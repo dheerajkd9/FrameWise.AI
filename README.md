@@ -172,8 +172,8 @@ The flower girl looking bored or distracted — definitely include.
 
 ## License
 
-MIT © FrameWise
+KD © FrameWise
 
 ---
 
-*Built with ❤️ for privacy-conscious couples everywhere.*
+*Built with ❤️ for privacy-conscious everywhere.*
