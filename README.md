@@ -1,6 +1,6 @@
-# FrameWise — AI Wedding Album Curator
+# FrameWise — AI Album Curator/Organizer/Guide
 
-> **Privacy-first, zero-storage AI curation for wedding photos.**
+> **Privacy-first, zero-storage AI curation for wedding/events/trip/fun photos.**
 > Your photos never leave your Google account.
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-framewise.app-rose)](https://your-username.github.io/framewise)
@@ -10,7 +10,7 @@
 
 ## What is FrameWise?
 
-FrameWise is a static, single-file web app that helps couples automatically curate their wedding photos into four beautiful albums — using Google's Gemini AI — **without ever uploading their photos to a third-party server.**
+FrameWise is a static, single-file web app that helps couples automatically curate their wedding/events/trip/fun photos into four beautiful albums — using Google's Gemini AI — **without ever uploading their photos to a third-party server.**
 
 Instead of storing your photos, FrameWise generates a personalised **Google Apps Script** that runs entirely inside your own Google account. You paste it into Google's free script editor, press Run, and wake up to your curated albums in Google Drive.
 
@@ -20,7 +20,7 @@ Instead of storing your photos, FrameWise generates a personalised **Google Apps
 
 | Album | What it finds | Best for |
 |---|---|---|
-| 💍 **Best Of** | Sharp, emotional, print-worthy moments | Wedding album / photographer |
+| 💍 **Best Of** | Sharp, emotional, print-worthy moments | wedding/events/trip/fun album / photographer |
 | 🤣 **Candids** | Unposed, spontaneous, real moments | Share with family |
 | ✨ **Décor & Details** | Flowers, henna, venue, jewellery | Instagram / social |
 | 🎲 **Hidden Gems** | Weird, random, aww background moments | The secret album |
@@ -79,7 +79,7 @@ Since it's a single HTML file, deployment is trivial:
 ```bash
 git clone https://github.com/YOUR_USERNAME/framewise
 cd framewise
-# drop wedding_curator.html in as index.html
+# drop album_curator.html in as index.html
 git add .
 git commit -m "deploy"
 git push origin main
@@ -87,7 +87,7 @@ git push origin main
 ```
 
 ### Netlify / Vercel (free)
-Just drag and drop `wedding_curator.html` into the Netlify drop zone at [app.netlify.com/drop](https://app.netlify.com/drop). Live in 30 seconds.
+Just drag and drop `album_curator.html` into the Netlify drop zone at [app.netlify.com/drop](https://app.netlify.com/drop). Live in 30 seconds.
 
 ---
 
@@ -121,7 +121,7 @@ No `package.json`. No build step. No node_modules. Just open `index.html` in a b
 └─────────────────────────────────────────────────────┘
 ```
 
-> **Recommendation:** Use the paid Gemini API (enabled via Google Cloud billing) so Google does not use your photos for AI model training. The paid tier costs ~₹50–400 total for a typical wedding — not per month.
+> **Recommendation:** Use the paid Gemini API (enabled via Google Cloud billing) so Google does not use your photos for AI model training. The paid tier costs ~₹50–400 total for a typical wedding/events/trip/fun — not per month.
 
 ---
 
@@ -157,7 +157,7 @@ The flower girl looking bored or distracted — definitely include.
 - [ ] Direct Google Photos album creation
 - [ ] WhatsApp-optimised compressed export
 - [ ] Multi-language support
-- [ ] Photographer portal (bulk processing multiple weddings)
+- [ ] Photographer portal (bulk processing multiple weddings/events/trip/fun)
 
 ---
 
