@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FrameWise — AI Wedding Album Curator</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --cream: #faf7f2;
+    --warm: #f5ede0;
+    --rose: #c9836a;
+    --rose-dark: #a8614c;
+    --gold: #c4a35a;
+    --gold-light: #e8d5a3;
+    --deep: #1a1208;
+    --text: #3d2e1e;
+    --muted: #8a7060;
+    --border: #e4d5c5;
+    --card: #fffdf9;
+    --green: #5a7a5c;
+    --blue: #4a6fa5;
+    --purple: #7a5c8a;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 48px;
+    background: rgba(250,247,242,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem; font-weight: 700;
+    color: var(--deep); letter-spacing: -0.02em;
+  }
+  .logo span { color: var(--rose); font-style: italic; }
+  .nav-links { display: flex; gap: 32px; align-items: center; }
+  .nav-links a {
+    text-decoration: none; color: var(--muted);
+    font-size: 0.9rem; font-weight: 500;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--rose); }
+  .btn-nav {
+    background: var(--deep); color: var(--cream) !important;
+    padding: 10px 22px; border-radius: 6px;
+    font-weight: 500; transition: background 0.2s !important;
+  }
+  .btn-nav:hover { background: var(--rose-dark) !important; color: white !important; }
+
+  /* ── SECTIONS ── */
+  section { scroll-margin-top: 70px; }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 100px 48px 80px;
+    background: linear-gradient(160deg, var(--cream) 0%, var(--warm) 60%, #ede0d0 100%);
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 700px 500px at 80% 20%, rgba(201,131,106,0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 500px 400px at 10% 80%, rgba(196,163,90,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 80px;
+    align-items: center;
+  }
+  .hero-text {}
+  .hero-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--gold-light); color: var(--rose-dark);
+    padding: 6px 16px; border-radius: 100px;
+    font-size: 0.78rem; font-weight: 500; letter-spacing: 0.05em;
+    text-transform: uppercase; margin-bottom: 24px;
+  }
+  .hero-pill::before { content: '✦'; }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.4rem, 4vw, 3.6rem);
+    line-height: 1.12; font-weight: 700;
+    color: var(--deep); margin-bottom: 20px;
+    letter-spacing: -0.03em;
+  }
+  h1 em { color: var(--rose); font-style: italic; }
+  .hero-sub {
+    font-size: 1.05rem; line-height: 1.7;
+    color: var(--muted); margin-bottom: 36px;
+    max-width: 460px;
+  }
+  .hero-cta { display: flex; gap: 14px; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--rose); color: white;
+    padding: 14px 30px; border-radius: 8px;
+    font-size: 0.95rem; font-weight: 500;
+    border: none; cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    text-decoration: none; display: inline-block;
+  }
+  .btn-primary:hover { background: var(--rose-dark); transform: translateY(-1px); }
+  .btn-secondary {
+    background: transparent; color: var(--deep);
+    padding: 14px 28px; border-radius: 8px;
+    font-size: 0.95rem; font-weight: 500;
+    border: 1.5px solid var(--border); cursor: pointer;
+    transition: border-color 0.2s, transform 0.15s;
+    text-decoration: none; display: inline-block;
+  }
+  .btn-secondary:hover { border-color: var(--rose); transform: translateY(-1px); }
+
+  /* hero visual */
+  .hero-visual {
+    position: relative; display: flex; justify-content: center;
+  }
+  .album-stack {
+    position: relative; width: 320px; height: 380px;
+  }
+  .album-card {
+    position: absolute; width: 240px; height: 300px;
+    border-radius: 12px; overflow: hidden;
+    box-shadow: 0 20px 60px rgba(26,18,8,0.18);
+    border: 3px solid white;
+  }
+  .album-card:nth-child(1) {
+    bottom: 0; left: 0;
+    background: linear-gradient(135deg, #d4a5a0 0%, #c97060 100%);
+    transform: rotate(-8deg);
+  }
+  .album-card:nth-child(2) {
+    bottom: 30px; left: 50px;
+    background: linear-gradient(135deg, #b8cdb0 0%, #6a9a6a 100%);
+    transform: rotate(-2deg);
+  }
+  .album-card:nth-child(3) {
+    bottom: 60px; left: 90px;
+    background: linear-gradient(135deg, #d4c5a0 0%, #c4a35a 100%);
+    transform: rotate(5deg);
+  }
+  .album-card-inner {
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .album-icon { font-size: 3rem; margin-bottom: 10px; }
+  .album-label {
+    font-family: 'Playfair Display', serif;
+    color: white; font-size: 1rem;
+    font-style: italic; text-align: center;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  /* ── HOW IT WORKS ── */
+  .how {
+    padding: 100px 48px;
+    background: var(--card);
+  }
+  .section-header { text-align: center; margin-bottom: 64px; }
+  .section-tag {
+    display: inline-block;
+    font-size: 0.75rem; font-weight: 500; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--gold);
+    margin-bottom: 12px;
+  }
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+    font-weight: 700; color: var(--deep);
+    letter-spacing: -0.02em; line-height: 1.2;
+  }
+  .section-sub {
+    font-size: 1rem; color: var(--muted);
+    margin-top: 14px; line-height: 1.7;
+    max-width: 540px; margin-left: auto; margin-right: auto;
+  }
+  .steps {
+    max-width: 900px; margin: 0 auto;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px;
+  }
+  .step {
+    background: var(--cream); border-radius: 16px;
+    padding: 36px 28px; border: 1px solid var(--border);
+    position: relative; overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .step:hover { transform: translateY(-4px); box-shadow: 0 20px 50px rgba(26,18,8,0.1); }
+  .step-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 3.5rem; font-weight: 700;
+    color: var(--gold-light); line-height: 1;
+    position: absolute; top: 16px; right: 20px;
+  }
+  .step-icon { font-size: 1.8rem; margin-bottom: 16px; }
+  .step h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem; font-weight: 700;
+    color: var(--deep); margin-bottom: 10px;
+  }
+  .step p { font-size: 0.88rem; color: var(--muted); line-height: 1.65; }
+
+  /* ── PRIVACY BADGE ── */
+  .privacy-bar {
+    background: var(--deep);
+    padding: 28px 48px;
+    display: flex; align-items: center; justify-content: center;
+    gap: 48px; flex-wrap: wrap;
+  }
+  .privacy-item {
+    display: flex; align-items: center; gap: 10px;
+    color: var(--gold-light); font-size: 0.88rem; font-weight: 500;
+  }
+  .privacy-item span:first-child { font-size: 1.2rem; }
+
+  /* ── ALBUM TYPES ── */
+  .albums-section {
+    padding: 100px 48px;
+    background: linear-gradient(180deg, var(--cream) 0%, var(--warm) 100%);
+  }
+  .albums-grid {
+    max-width: 1100px; margin: 0 auto;
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;
+  }
+  .album-type {
+    background: var(--card); border-radius: 20px;
+    border: 1px solid var(--border);
+    padding: 36px; display: flex; gap: 24px;
+    align-items: flex-start;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .album-type:hover { transform: translateY(-4px); box-shadow: 0 20px 50px rgba(26,18,8,0.1); }
+  .album-type-icon {
+    width: 56px; height: 56px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; flex-shrink: 0;
+  }
+  .icon-rose { background: #fde8e0; }
+  .icon-green { background: #e0ede1; }
+  .icon-gold { background: #fdf3dc; }
+  .icon-purple { background: #ede0f5; }
+  .album-type-text h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem; color: var(--deep); margin-bottom: 8px;
+  }
+  .album-type-text p { font-size: 0.87rem; color: var(--muted); line-height: 1.65; }
+  .album-tag {
+    display: inline-block; margin-top: 10px;
+    background: var(--warm); color: var(--rose);
+    padding: 3px 10px; border-radius: 100px;
+    font-size: 0.75rem; font-weight: 500;
+  }
+
+  /* ── APP SECTION ── */
+  .app-section {
+    padding: 100px 48px;
+    background: var(--card);
+    id: "app";
+  }
+  .app-container {
+    max-width: 760px; margin: 0 auto;
+    background: var(--cream);
+    border-radius: 24px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    box-shadow: 0 30px 80px rgba(26,18,8,0.12);
+  }
+  .app-header {
+    background: var(--deep);
+    padding: 28px 40px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .app-header-icon { font-size: 1.8rem; }
+  .app-header h3 {
+    font-family: 'Playfair Display', serif;
+    color: var(--gold-light); font-size: 1.3rem;
+    font-style: italic;
+  }
+  .app-header p { color: rgba(255,255,255,0.5); font-size: 0.82rem; margin-top: 2px; }
+  .app-body { padding: 40px; }
+
+  /* progress steps */
+  .progress-steps {
+    display: flex; align-items: center; gap: 0;
+    margin-bottom: 40px;
+  }
+  .prog-step {
+    flex: 1; text-align: center;
+    position: relative;
+  }
+  .prog-step::after {
+    content: '';
+    position: absolute; top: 14px; left: 60%; width: 80%;
+    height: 2px; background: var(--border);
+  }
+  .prog-step:last-child::after { display: none; }
+  .prog-dot {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--border); color: var(--muted);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700;
+    margin: 0 auto 6px;
+    position: relative; z-index: 1;
+    transition: background 0.3s, color 0.3s;
+  }
+  .prog-step.active .prog-dot { background: var(--rose); color: white; }
+  .prog-step.done .prog-dot { background: var(--green); color: white; }
+  .prog-step.done::after { background: var(--green); }
+  .prog-label { font-size: 0.7rem; color: var(--muted); font-weight: 500; }
+  .prog-step.active .prog-label { color: var(--rose); }
+
+  /* form */
+  .form-step { display: none; }
+  .form-step.active { display: block; }
+  .field-group { margin-bottom: 24px; }
+  label {
+    display: block; font-size: 0.82rem; font-weight: 500;
+    color: var(--text); margin-bottom: 8px;
+  }
+  label .hint {
+    font-weight: 400; color: var(--muted); font-size: 0.78rem;
+    display: block; margin-top: 2px;
+  }
+  input[type="text"], input[type="url"], textarea, select {
+    width: 100%; padding: 12px 16px;
+    border: 1.5px solid var(--border); border-radius: 8px;
+    background: white; font-size: 0.9rem;
+    font-family: 'DM Sans', sans-serif; color: var(--text);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--rose);
+    box-shadow: 0 0 0 3px rgba(201,131,106,0.15);
+  }
+  textarea { resize: vertical; min-height: 90px; }
+  .input-note {
+    margin-top: 6px; font-size: 0.76rem; color: var(--muted);
+    display: flex; align-items: center; gap: 5px;
+  }
+  .input-note::before { content: '🔒'; font-size: 0.8rem; }
+
+  /* album toggles */
+  .album-toggles {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    margin-bottom: 8px;
+  }
+  .toggle-card {
+    border: 1.5px solid var(--border);
+    border-radius: 10px; padding: 14px 16px;
+    cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; gap: 12px;
+    background: white;
+  }
+  .toggle-card:hover { border-color: var(--rose); }
+  .toggle-card input[type="checkbox"] { display: none; }
+  .toggle-card.checked {
+    border-color: var(--rose);
+    background: #fff5f2;
+  }
+  .toggle-card-icon { font-size: 1.3rem; }
+  .toggle-card-text { flex: 1; }
+  .toggle-card-text strong { display: block; font-size: 0.85rem; color: var(--deep); }
+  .toggle-card-text span { font-size: 0.75rem; color: var(--muted); }
+  .toggle-check {
+    width: 18px; height: 18px; border-radius: 5px;
+    border: 1.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.65rem; transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .toggle-card.checked .toggle-check {
+    background: var(--rose); border-color: var(--rose); color: white;
+  }
+
+  /* event rows */
+  .events-list { display: flex; flex-direction: column; gap: 12px; }
+  .event-row {
+    display: grid; grid-template-columns: 1fr 80px 100px auto;
+    gap: 10px; align-items: center;
+    background: white; border: 1.5px solid var(--border);
+    border-radius: 10px; padding: 12px 14px;
+  }
+  .event-row input[type="text"] { border: none; padding: 0; background: transparent; font-size: 0.88rem; }
+  .event-row input[type="text"]:focus { box-shadow: none; }
+  .event-row input[type="number"] {
+    width: 100%; border: none; padding: 0; background: transparent;
+    font-size: 0.88rem; text-align: center;
+  }
+  .event-row input[type="number"]:focus { box-shadow: none; }
+  .event-col-label { font-size: 0.7rem; color: var(--muted); font-weight: 500; text-align: center; }
+  .remove-event {
+    background: none; border: none; cursor: pointer;
+    color: var(--muted); font-size: 1rem;
+    padding: 4px; border-radius: 4px;
+    transition: color 0.2s;
+  }
+  .remove-event:hover { color: var(--rose); }
+  .event-headers {
+    display: grid; grid-template-columns: 1fr 80px 100px auto;
+    gap: 10px; padding: 0 14px; margin-bottom: 4px;
+  }
+  .add-event-btn {
+    background: none; border: 1.5px dashed var(--border);
+    border-radius: 10px; padding: 12px;
+    font-size: 0.85rem; color: var(--muted);
+    cursor: pointer; width: 100%; margin-top: 8px;
+    font-family: 'DM Sans', sans-serif;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .add-event-btn:hover { border-color: var(--rose); color: var(--rose); }
+
+  .form-nav {
+    display: flex; justify-content: space-between;
+    margin-top: 32px; gap: 12px;
+  }
+  .btn-back {
+    background: none; border: 1.5px solid var(--border);
+    color: var(--muted); padding: 12px 24px;
+    border-radius: 8px; font-size: 0.9rem;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-back:hover { border-color: var(--text); color: var(--text); }
+  .btn-forward {
+    background: var(--rose); color: white;
+    padding: 12px 28px; border-radius: 8px;
+    font-size: 0.9rem; font-weight: 500;
+    border: none; cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: background 0.2s; flex: 1; max-width: 240px;
+  }
+  .btn-forward:hover { background: var(--rose-dark); }
+  .btn-generate {
+    background: var(--deep); color: var(--gold-light);
+    padding: 14px 28px; border-radius: 8px;
+    font-size: 0.95rem; font-weight: 500;
+    border: none; cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: background 0.2s; flex: 1;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-generate:hover { background: var(--rose-dark); }
+
+  /* output */
+  .output-box {
+    background: #0d1117; border-radius: 12px;
+    padding: 24px; font-family: 'Courier New', monospace;
+    font-size: 0.78rem; line-height: 1.6;
+    color: #c9d1d9; max-height: 400px; overflow-y: auto;
+    white-space: pre-wrap; word-break: break-word;
+    border: 1px solid #30363d;
+  }
+  .output-actions { display: flex; gap: 12px; margin-top: 16px; }
+  .btn-copy {
+    background: var(--green); color: white;
+    padding: 10px 20px; border-radius: 7px;
+    font-size: 0.85rem; font-weight: 500;
+    border: none; cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: opacity 0.2s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-copy:hover { opacity: 0.85; }
+  .btn-restart {
+    background: none; border: 1.5px solid var(--border);
+    color: var(--muted); padding: 10px 20px;
+    border-radius: 7px; font-size: 0.85rem;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-restart:hover { border-color: var(--rose); color: var(--rose); }
+
+  /* instructions */
+  .instructions-accordion { margin-top: 24px; }
+  .acc-item {
+    border: 1px solid var(--border); border-radius: 10px;
+    margin-bottom: 8px; overflow: hidden;
+  }
+  .acc-header {
+    padding: 14px 20px; background: white;
+    display: flex; justify-content: space-between; align-items: center;
+    cursor: pointer; font-size: 0.88rem; font-weight: 500;
+    color: var(--text); user-select: none;
+    transition: background 0.2s;
+  }
+  .acc-header:hover { background: var(--warm); }
+  .acc-arrow { transition: transform 0.2s; font-size: 0.7rem; color: var(--muted); }
+  .acc-item.open .acc-arrow { transform: rotate(180deg); }
+  .acc-body {
+    display: none; padding: 16px 20px;
+    background: var(--cream); border-top: 1px solid var(--border);
+    font-size: 0.84rem; color: var(--muted); line-height: 1.7;
+  }
+  .acc-item.open .acc-body { display: block; }
+  .acc-body ol { padding-left: 18px; }
+  .acc-body li { margin-bottom: 6px; }
+  .acc-body a { color: var(--rose); }
+  .acc-body code {
+    background: white; padding: 1px 6px; border-radius: 4px;
+    font-size: 0.8rem; border: 1px solid var(--border);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--deep); color: rgba(255,255,255,0.5);
+    padding: 60px 48px 40px;
+    text-align: center;
+  }
+  .footer-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem; color: var(--gold-light);
+    margin-bottom: 12px; font-style: italic;
+  }
+  .footer-sub { font-size: 0.85rem; margin-bottom: 32px; line-height: 1.6; }
+  .footer-links { display: flex; justify-content: center; gap: 28px; flex-wrap: wrap; }
+  .footer-links a { color: rgba(255,255,255,0.4); font-size: 0.82rem; text-decoration: none; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--gold-light); }
+  .footer-bottom { margin-top: 40px; font-size: 0.78rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 24px; }
+
+  /* ── responsive ── */
+  @media (max-width: 768px) {
+    nav { padding: 16px 20px; }
+    .nav-links { display: none; }
+    .hero { padding: 90px 20px 60px; }
+    .hero-inner { grid-template-columns: 1fr; gap: 48px; }
+    .hero-visual { display: none; }
+    .how, .albums-section, .app-section { padding: 70px 20px; }
+    .steps { grid-template-columns: 1fr; }
+    .albums-grid { grid-template-columns: 1fr; }
+    .privacy-bar { padding: 20px; gap: 20px; }
+    .app-body { padding: 24px 20px; }
+    .album-toggles { grid-template-columns: 1fr; }
+    .event-row { grid-template-columns: 1fr 60px 80px auto; }
+    footer { padding: 48px 20px 32px; }
+  }
+
+  /* color accents in code output */
+  .kw { color: #ff7b72; }
+  .str { color: #a5d6ff; }
+  .cm { color: #8b949e; }
+  .fn { color: #d2a8ff; }
+
+  /* loading spinner */
+  .spinner {
+    width: 20px; height: 20px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+  .btn-generate.loading .spinner { display: block; }
+  .btn-generate.loading .gen-label { display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Frame<span>Wise</span></div>
+  <div class="nav-links">
+    <a href="#how">How it works</a>
+    <a href="#albums">Album types</a>
+    <a href="#app">Get started</a>
+    <a href="#app" class="btn-nav">Create my albums →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="hero-pill">Privacy-first · No storage · AI-powered</div>
+      <h1>Your wedding, curated<br>by <em>AI that forgets</em></h1>
+      <p class="hero-sub">
+        Share your Google Drive folder. Our AI scores every photo and builds you four beautiful albums — Best Of, Candids, Décor &amp; Details, and Random Gems. Your photos never leave your Google account.
+      </p>
+      <div class="hero-cta">
+        <a href="#app" class="btn-primary">Build my albums →</a>
+        <a href="#how" class="btn-secondary">See how it works</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="album-stack">
+        <div class="album-card">
+          <div class="album-card-inner">
+            <div class="album-icon">💍</div>
+            <div class="album-label">Best Of</div>
+          </div>
+        </div>
+        <div class="album-card">
+          <div class="album-card-inner">
+            <div class="album-icon">😂</div>
+            <div class="album-label">Candids</div>
+          </div>
+        </div>
+        <div class="album-card">
+          <div class="album-card-inner">
+            <div class="album-icon">✨</div>
+            <div class="album-label">Hidden Gems</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRIVACY BAR -->
+<div class="privacy-bar">
+  <div class="privacy-item"><span>🔒</span> We never store your photos</div>
+  <div class="privacy-item"><span>☁️</span> Everything stays in your Google Drive</div>
+  <div class="privacy-item"><span>🤖</span> Gemini AI scores photos on Google's servers</div>
+  <div class="privacy-item"><span>🗑️</span> Script auto-deletes when done</div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section id="how" class="how">
+  <div class="section-header">
+    <div class="section-tag">How it works</div>
+    <h2>Three steps, then go to sleep</h2>
+    <p class="section-sub">You configure your albums here, we generate a ready-to-run Google Apps Script. Press one button in Google, wake up to your curated albums.</p>
+  </div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-icon">⚙️</div>
+      <h3>Configure your albums</h3>
+      <p>Tell us your Google Drive folder link, your wedding events, photo quotas, and which album types you want. Add custom AI prompts for moments that matter to you.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-icon">📋</div>
+      <h3>Copy your script</h3>
+      <p>We generate a personalised Google Apps Script. Paste it into Google's free script editor (script.google.com) — no coding needed, just copy-paste.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-icon">🌙</div>
+      <h3>Run it overnight</h3>
+      <p>Hit run before bed. The script processes your photos automatically, every 10 minutes, saving progress after each one. Wake up to four beautiful albums in your Drive.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ALBUM TYPES -->
+<section id="albums" class="albums-section">
+  <div class="section-header">
+    <div class="section-tag">Album types</div>
+    <h2>Four albums, four stories</h2>
+    <p class="section-sub">One wedding, four completely different perspectives. Each album is crafted by AI trained to see what a human curator would.</p>
+  </div>
+  <div class="albums-grid" style="max-width:1100px;margin:0 auto;">
+    <div class="album-type">
+      <div class="album-type-icon icon-rose">💍</div>
+      <div class="album-type-text">
+        <h3>Best Of Album</h3>
+        <p>Sharp faces, perfect lighting, genuine emotion. The AI picks your top photos per event, exactly like a professional album curator would. These go to the printer.</p>
+        <div class="album-tag">Print-ready</div>
+      </div>
+    </div>
+    <div class="album-type">
+      <div class="album-type-icon icon-green">🤣</div>
+      <div class="album-type-text">
+        <h3>Candid Moments</h3>
+        <p>Unposed, unplanned, unforgettable. Guests mid-laugh, uncle dancing, flower girl distracted. The AI finds the authentic moments your official album misses.</p>
+        <div class="album-tag">Share with family</div>
+      </div>
+    </div>
+    <div class="album-type">
+      <div class="album-type-icon icon-gold">✨</div>
+      <div class="album-type-text">
+        <h3>Décor &amp; Details</h3>
+        <p>The flowers, the henna, the table settings, the little moments of beauty. A separate album for the visuals that set the scene — Instagram-ready aesthetic shots.</p>
+        <div class="album-tag">Share on social</div>
+      </div>
+    </div>
+    <div class="album-type">
+      <div class="album-type-icon icon-purple">🎲</div>
+      <div class="album-type-text">
+        <h3>Hidden Gems</h3>
+        <p>The weird, the random, the aww moments in the background. Photos that got passed over but have something special. Every wedding has them — now you'll find them.</p>
+        <div class="album-tag">The secret album</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- APP -->
+<section id="app" class="app-section">
+  <div class="section-header">
+    <div class="section-tag">Script generator</div>
+    <h2>Build your personalised script</h2>
+    <p class="section-sub">Fill in the form below. We'll generate a ready-to-run Google Apps Script customised for your wedding.</p>
+  </div>
+
+  <div class="app-container">
+    <div class="app-header">
+      <div class="app-header-icon">📸</div>
+      <div>
+        <h3>FrameWise Script Generator</h3>
+        <p>Your data is never sent to us — everything is generated in your browser</p>
+      </div>
+    </div>
+    <div class="app-body">
+
+      <!-- Progress -->
+      <div class="progress-steps">
+        <div class="prog-step active" id="prog-1">
+          <div class="prog-dot">1</div>
+          <div class="prog-label">Drive setup</div>
+        </div>
+        <div class="prog-step" id="prog-2">
+          <div class="prog-dot">2</div>
+          <div class="prog-label">Album types</div>
+        </div>
+        <div class="prog-step" id="prog-3">
+          <div class="prog-dot">3</div>
+          <div class="prog-label">Events</div>
+        </div>
+        <div class="prog-step" id="prog-4">
+          <div class="prog-dot">4</div>
+          <div class="prog-label">AI themes</div>
+        </div>
+        <div class="prog-step" id="prog-5">
+          <div class="prog-dot">5</div>
+          <div class="prog-label">Your script</div>
+        </div>
+      </div>
+
+      <!-- Step 1: Drive Setup -->
+      <div class="form-step active" id="step-1">
+        <div class="field-group">
+          <label>
+            Google Drive Parent Folder URL
+            <span class="hint">Open your parent wedding folder in Drive, copy the URL from your browser</span>
+          </label>
+          <input type="url" id="drive-url" placeholder="https://drive.google.com/drive/folders/1BxxxxxxxxxxxxxxxMdK" />
+          <div class="input-note">This stays in your browser — we never receive this link</div>
+        </div>
+        <div class="field-group">
+          <label>
+            Gemini API Key
+            <span class="hint">Get a free key at <a href="https://aistudio.google.com" target="_blank" style="color:var(--rose)">aistudio.google.com</a> → Get API Key</span>
+          </label>
+          <input type="text" id="api-key" placeholder="AIza••••••••••••••••••••••••••••••••••" />
+          <div class="input-note">Stored only in this browser session — never transmitted to us</div>
+        </div>
+        <div class="field-group">
+          <label>
+            Total photos to select
+            <span class="hint">How many photos do you want in your Best Of album in total? (e.g. 100)</span>
+          </label>
+          <input type="text" id="total-photos" placeholder="100" value="100" />
+        </div>
+        <div class="form-nav">
+          <div></div>
+          <button class="btn-forward" onclick="goToStep(2)">Next: Album types →</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Album Types -->
+      <div class="form-step" id="step-2">
+        <div class="field-group">
+          <label>Which albums do you want to generate?</label>
+          <div class="album-toggles">
+            <div class="toggle-card checked" onclick="toggleCard(this,'best-of')">
+              <input type="checkbox" checked />
+              <div class="toggle-card-icon">💍</div>
+              <div class="toggle-card-text">
+                <strong>Best Of</strong>
+                <span>Top picks per event</span>
+              </div>
+              <div class="toggle-check">✓</div>
+            </div>
+            <div class="toggle-card checked" onclick="toggleCard(this,'candid')">
+              <input type="checkbox" checked />
+              <div class="toggle-card-icon">🤣</div>
+              <div class="toggle-card-text">
+                <strong>Candids</strong>
+                <span>Unposed moments</span>
+              </div>
+              <div class="toggle-check">✓</div>
+            </div>
+            <div class="toggle-card checked" onclick="toggleCard(this,'decor')">
+              <input type="checkbox" checked />
+              <div class="toggle-card-icon">✨</div>
+              <div class="toggle-card-text">
+                <strong>Décor &amp; Details</strong>
+                <span>Venue &amp; aesthetic shots</span>
+              </div>
+              <div class="toggle-check">✓</div>
+            </div>
+            <div class="toggle-card checked" onclick="toggleCard(this,'gems')">
+              <input type="checkbox" checked />
+              <div class="toggle-card-icon">🎲</div>
+              <div class="toggle-card-text">
+                <strong>Hidden Gems</strong>
+                <span>Weird, random, aww</span>
+              </div>
+              <div class="toggle-check">✓</div>
+            </div>
+          </div>
+        </div>
+        <div class="form-nav">
+          <button class="btn-back" onclick="goToStep(1)">← Back</button>
+          <button class="btn-forward" onclick="goToStep(3)">Next: Wedding events →</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Events -->
+      <div class="form-step" id="step-3">
+        <div class="field-group">
+          <label>
+            Your wedding events
+            <span class="hint">Add each event folder exactly as named in Google Drive (case-sensitive). Set photo quota for Best Of album.</span>
+          </label>
+          <div class="event-headers">
+            <div class="event-col-label" style="text-align:left">Folder name (exact)</div>
+            <div class="event-col-label">Best Of #</div>
+            <div class="event-col-label">Event key</div>
+            <div></div>
+          </div>
+          <div class="events-list" id="events-list">
+            <!-- populated by JS -->
+          </div>
+          <button class="add-event-btn" onclick="addEvent()">+ Add another event</button>
+        </div>
+        <div class="form-nav">
+          <button class="btn-back" onclick="goToStep(2)">← Back</button>
+          <button class="btn-forward" onclick="goToStep(4)">Next: AI themes →</button>
+        </div>
+      </div>
+
+      <!-- Step 4: AI Themes -->
+      <div class="form-step" id="step-4">
+        <div class="field-group">
+          <label>
+            Custom moments to capture <em style="font-weight:400;color:var(--muted)">(optional)</em>
+            <span class="hint">Describe moments you don't want the AI to miss. The more specific, the better. Plain English — no coding.</span>
+          </label>
+          <textarea id="custom-themes" placeholder="e.g. Capture moments where the couple is looking at each other. Pick any photo where grandparents are present. Prioritise outdoor natural light shots. Flag any photo with the bride's parents. I want any candid where guests look surprised or emotional."
+          style="min-height:120px;"></textarea>
+        </div>
+        <div class="field-group">
+          <label>
+            Things to avoid
+            <span class="hint">Anything the AI should score down or skip entirely</span>
+          </label>
+          <textarea id="avoid-themes" placeholder="e.g. Avoid shots where eyes are closed unless it's a candid laugh. Skip photos where the caterers/staff are the main subject. Avoid near-duplicate burst shots." style="min-height:90px;"></textarea>
+        </div>
+        <div class="field-group">
+          <label>
+            Candid &amp; Hidden Gem themes
+            <span class="hint">What kind of background moments or random gems do you want found?</span>
+          </label>
+          <textarea id="candid-themes" placeholder="e.g. Find photos where guests are dancing, laughing, or looking surprised. Any child doing something cute. Anyone crying happy tears. The flower girl looking bored. Uncle at the dessert table." style="min-height:90px;"></textarea>
+        </div>
+        <div class="form-nav">
+          <button class="btn-back" onclick="goToStep(3)">← Back</button>
+          <button class="btn-forward" onclick="goToStep(5); generateScript()">✦ Generate my script →</button>
+        </div>
+      </div>
+
+      <!-- Step 5: Output -->
+      <div class="form-step" id="step-5">
+        <p style="font-size:0.88rem;color:var(--muted);margin-bottom:16px;line-height:1.6;">
+          Your personalised Google Apps Script is ready. Copy it, open <a href="https://script.google.com" target="_blank" style="color:var(--rose)">script.google.com</a>, create a new project, paste it, and run <code style="background:var(--warm);padding:2px 6px;border-radius:4px;">startFresh</code>.
+        </p>
+        <div id="script-output" class="output-box"></div>
+        <div class="output-actions">
+          <button class="btn-copy" onclick="copyScript()">📋 Copy script</button>
+          <button class="btn-restart" onclick="goToStep(1)">← Start over</button>
+        </div>
+
+        <!-- Instructions accordion -->
+        <div class="instructions-accordion" style="margin-top:28px;">
+          <h4 style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--deep);margin-bottom:12px;">Quick setup guide</h4>
+          <div class="acc-item open">
+            <div class="acc-header" onclick="toggleAcc(this)">
+              Step 1: Paste into Google Apps Script
+              <span class="acc-arrow">▼</span>
+            </div>
+            <div class="acc-body">
+              <ol>
+                <li>Go to <a href="https://script.google.com" target="_blank">script.google.com</a></li>
+                <li>Click <strong>New Project</strong></li>
+                <li>Select all (Ctrl+A) and delete the existing code</li>
+                <li>Paste the script you just copied</li>
+                <li>Press Ctrl+S to save</li>
+              </ol>
+            </div>
+          </div>
+          <div class="acc-item">
+            <div class="acc-header" onclick="toggleAcc(this)">
+              Step 2: Fix permissions file (important!)
+              <span class="acc-arrow">▼</span>
+            </div>
+            <div class="acc-body">
+              <ol>
+                <li>Click the ⚙️ Settings gear icon in the left sidebar</li>
+                <li>Check <strong>"Show appsscript.json manifest file in editor"</strong></li>
+                <li>Click on <code>appsscript.json</code> in the file panel</li>
+                <li>Replace all its contents with the JSON block included at the bottom of your script</li>
+                <li>Save with Ctrl+S</li>
+              </ol>
+            </div>
+          </div>
+          <div class="acc-item">
+            <div class="acc-header" onclick="toggleAcc(this)">
+              Step 3: Run it
+              <span class="acc-arrow">▼</span>
+            </div>
+            <div class="acc-body">
+              <ol>
+                <li>In the function dropdown, select <code>startFresh</code></li>
+                <li>Click ▶ Run</li>
+                <li>Approve permissions when asked (click Advanced → Go to project)</li>
+                <li>Wait for the log to say <em>"You can now CLOSE THIS TAB"</em></li>
+                <li>Close and sleep — albums appear in your Drive when done ✅</li>
+              </ol>
+            </div>
+          </div>
+          <div class="acc-item">
+            <div class="acc-header" onclick="toggleAcc(this)">
+              Troubleshooting
+              <span class="acc-arrow">▼</span>
+            </div>
+            <div class="acc-body">
+              <strong>Error 429 (quota exceeded):</strong> Enable billing at <a href="https://cloud.google.com/free" target="_blank">cloud.google.com/free</a>. You won't be charged — free $300 credits apply.<br><br>
+              <strong>Too many redirects:</strong> Use an incognito window (Ctrl+Shift+N) and sign in with only your wedding Google account.<br><br>
+              <strong>0 photos found for an event:</strong> Folder name in the script must match Drive exactly — check spacing and capitalisation.<br><br>
+              <strong>Script stuck:</strong> Run <code>checkProgress</code> to see how many photos are done, then <code>resumeFromSaved</code> to continue.
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">FrameWise</div>
+  <div class="footer-sub">
+    AI wedding album curation · Privacy first · Zero data storage<br>
+    Your photos never leave your Google account.
+  </div>
+  <div class="footer-links">
+    <a href="#how">How it works</a>
+    <a href="#albums">Album types</a>
+    <a href="#app">Get started</a>
+    <a href="https://aistudio.google.com" target="_blank">Get API key</a>
+    <a href="https://script.google.com" target="_blank">Google Apps Script</a>
+  </div>
+  <div class="footer-bottom">Built with ❤️ for privacy-conscious couples everywhere</div>
+</footer>
+
+<script>
+// ── STATE ──
+let currentStep = 1;
+let selectedAlbums = { 'best-of': true, 'candid': true, 'decor': true, 'gems': true };
+let events = [
+  { name: 'Mehendi', quota: 25, key: 'event1' },
+  { name: 'Sangeet', quota: 20, key: 'event2' },
+  { name: 'Wedding', quota: 40, key: 'event3' },
+  { name: 'Reception', quota: 15, key: 'event4' }
+];
+let generatedScript = '';
+
+// ── NAVIGATION ──
+function goToStep(n) {
+  document.getElementById('step-' + currentStep).classList.remove('active');
+  document.getElementById('prog-' + currentStep).classList.remove('active');
+  document.getElementById('prog-' + currentStep).classList.add('done');
+  if (n < currentStep) {
+    // going back — remove done from future
+    for (let i = n; i <= 5; i++) {
+      document.getElementById('prog-' + i).classList.remove('done');
+    }
+  }
+  currentStep = n;
+  document.getElementById('step-' + n).classList.add('active');
+  document.getElementById('prog-' + n).classList.add('active');
+  document.getElementById('prog-' + n).classList.remove('done');
+  if (n === 3) renderEvents();
+  window.scrollTo({ top: document.getElementById('app').offsetTop - 80, behavior: 'smooth' });
+}
+
+// ── ALBUM TOGGLES ──
+function toggleCard(el, key) {
+  el.classList.toggle('checked');
+  selectedAlbums[key] = el.classList.contains('checked');
+}
+
+// ── EVENTS ──
+function renderEvents() {
+  const list = document.getElementById('events-list');
+  list.innerHTML = events.map((e, i) => `
+    <div class="event-row">
+      <input type="text" value="${e.name}" placeholder="Folder name (exact)" oninput="events[${i}].name=this.value" />
+      <input type="number" value="${e.quota}" min="1" max="999" oninput="events[${i}].quota=parseInt(this.value)||0" />
+      <input type="text" value="${e.key}" placeholder="event${i+1}" oninput="events[${i}].key=this.value" />
+      <button class="remove-event" onclick="removeEvent(${i})" title="Remove">✕</button>
+    </div>
+  `).join('');
+}
+
+function addEvent() {
+  const n = events.length + 1;
+  events.push({ name: '', quota: 10, key: 'event' + n });
+  renderEvents();
+}
+
+function removeEvent(i) {
+  if (events.length <= 1) return;
+  events.splice(i, 1);
+  renderEvents();
+}
+
+// ── SCRIPT GENERATION ──
+function getFolderIdFromUrl(url) {
+  const match = url.match(/folders\/([a-zA-Z0-9_-]+)/);
+  return match ? match[1] : 'PASTE_YOUR_PARENT_FOLDER_ID_HERE';
+}
+
+function generateScript() {
+  const driveUrl = document.getElementById('drive-url').value.trim();
+  const apiKey = document.getElementById('api-key').value.trim();
+  const customThemes = document.getElementById('custom-themes').value.trim();
+  const avoidThemes = document.getElementById('avoid-themes').value.trim();
+  const candidThemes = document.getElementById('candid-themes').value.trim();
+  const folderId = getFolderIdFromUrl(driveUrl) || 'PASTE_YOUR_FOLDER_ID';
+  const key = apiKey || 'PASTE_YOUR_GEMINI_API_KEY';
+
+  const albumTypes = Object.entries(selectedAlbums).filter(([,v])=>v).map(([k])=>k);
+
+  const quotaBlock = events.map(e => `  "${e.key}": ${e.quota}`).join(',\n');
+  const folderBlock = events.map(e => `  "${e.name}": "${e.key}"`).join(',\n');
+
+  const customSection = customThemes ? `\n// CUSTOM MOMENTS TO PRIORITISE:\n// ${customThemes.replace(/\n/g,'\n// ')}` : '';
+  const avoidSection = avoidThemes ? `\n// MOMENTS TO AVOID:\n// ${avoidThemes.replace(/\n/g,'\n// ')}` : '';
+  const candidSection = candidThemes ? `\n// CANDID & HIDDEN GEM THEMES:\n// ${candidThemes.replace(/\n/g,'\n// ')}` : '';
+
+  const customPromptRules = [];
+  if (customThemes) customSection && customPromptRules.push(customThemes.split('\n').map(l=>`"${l.trim()}\\n" +`).join('\n        '));
+  if (avoidThemes) customPromptRules.push(`"AVOID: ${avoidThemes.replace(/\n/g,'; ')}\\n" +`);
+
+  const candidPromptExtra = candidThemes
+    ? `\n"\\nSPECIAL CANDID THEMES THE USER WANTS FOUND:\\n${candidThemes.replace(/"/g,"'")}\\n" +`
+    : '';
+
+  const albumRunners = [];
+  if (selectedAlbums['best-of']) albumRunners.push('runBestOf()');
+  if (selectedAlbums['candid']) albumRunners.push('runCandids()');
+  if (selectedAlbums['decor']) albumRunners.push('runDecor()');
+  if (selectedAlbums['gems']) albumRunners.push('runHiddenGems()');
+
+  generatedScript = `// ================================================================
+// FRAMEWISE — AI WEDDING ALBUM CURATOR
+// Generated by FrameWise · framewise.app
+// ================================================================
+// ALBUMS TO GENERATE: ${albumTypes.join(', ')}
+${customSection}${avoidSection}${candidSection}
+// ================================================================
+
+// --- YOUR CONFIGURATION ---
+var PARENT_FOLDER_ID = "${folderId}";
+var GEMINI_API_KEY   = "${key}";
+
+// --- PHOTO QUOTAS (Best Of album — must add up to your total) ---
+var QUOTA = {
+${quotaBlock}
+};
+
+// --- MAP EXACT DRIVE FOLDER NAMES TO EVENT KEYS ---
+var FOLDER_CATEGORY = {
+${folderBlock}
+};
+
+// --- DESCRIBE EACH EVENT FOR THE AI ---
+var CATEGORY_CONTEXT = {
+${events.map(e => `  "${e.key}": "This is the ${e.name} event. Score photos for a printed wedding album. Prioritise moments where people are emotionally engaged, expressions are natural, and the composition is strong."`).join(',\n')}
+};
+
+// --- TECHNICAL SETTINGS ---
+var TRIGGER_MINUTES   = 10;
+var MAX_SECONDS_PER_RUN = 300;
+var RUN_BEST_OF  = ${selectedAlbums['best-of'] ? 'true' : 'false'};
+var RUN_CANDIDS  = ${selectedAlbums['candid'] ? 'true' : 'false'};
+var RUN_DECOR    = ${selectedAlbums['decor'] ? 'true' : 'false'};
+var RUN_GEMS     = ${selectedAlbums['gems'] ? 'true' : 'false'};
+
+// ================================================================
+// CORE ENGINE — Do not edit below this line
+// ================================================================
+
+function checkProgress() {
+  var props = PropertiesService.getScriptProperties();
+  var scores = JSON.parse(props.getProperty("scores") || "[]");
+  var currentIndex = props.getProperty("currentIndex") || "0";
+  var allPhotos = JSON.parse(props.getProperty("allPhotos") || "[]");
+  Logger.log("Total photos: " + allPhotos.length);
+  Logger.log("Scored so far: " + scores.length);
+  Logger.log("Next photo index: " + currentIndex);
+}
+
+function startFresh() {
+  clearAll();
+  var folder = DriveApp.getFolderById(PARENT_FOLDER_ID);
+  var allPhotos = [];
+  var subfolders = folder.getFolders();
+  while (subfolders.hasNext()) {
+    var sub = subfolders.next();
+    var folderName = sub.getName();
+    var category = FOLDER_CATEGORY[folderName];
+    if (!category) {
+      Logger.log("Skipping: " + folderName);
+      continue;
+    }
+    var files = sub.getFiles();
+    while (files.hasNext()) {
+      var file = files.next();
+      if (file.getMimeType().indexOf("image/") === 0) {
+        allPhotos.push({ name: file.getName(), id: file.getId(), mimeType: file.getMimeType(), category: category });
+      }
+    }
+  }
+  Logger.log("=== TOTAL PHOTOS: " + allPhotos.length + " ===");
+  var props = PropertiesService.getScriptProperties();
+  props.setProperty("allPhotos", JSON.stringify(allPhotos));
+  props.setProperty("currentIndex", "0");
+  props.setProperty("scores", "[]");
+  props.setProperty("status", "running");
+  ScriptApp.newTrigger("processBatch").timeBased().everyMinutes(TRIGGER_MINUTES).create();
+  Logger.log("Auto-trigger created. Close this tab and wait — albums will appear in Drive.");
+  processBatch();
+}
+
+function resumeFromSaved() {
+  var props = PropertiesService.getScriptProperties();
+  props.setProperty("status", "running");
+  var triggers = ScriptApp.getProjectTriggers();
+  for (var i = 0; i < triggers.length; i++) ScriptApp.deleteTrigger(triggers[i]);
+  ScriptApp.newTrigger("processBatch").timeBased().everyMinutes(TRIGGER_MINUTES).create();
+  Logger.log("Resumed. Trigger recreated.");
+  processBatch();
+}
+
+function processBatch() {
+  var startTime = new Date().getTime();
+  var props = PropertiesService.getScriptProperties();
+  if (props.getProperty("status") !== "running") return;
+  var allPhotos = JSON.parse(props.getProperty("allPhotos") || "[]");
+  var currentIndex = parseInt(props.getProperty("currentIndex") || "0");
+  var scores = JSON.parse(props.getProperty("scores") || "[]");
+  if (currentIndex >= allPhotos.length) { finalize(); return; }
+  Logger.log("Resuming from photo " + (currentIndex + 1) + " of " + allPhotos.length);
+
+  for (var i = currentIndex; i < allPhotos.length; i++) {
+    var elapsed = (new Date().getTime() - startTime) / 1000;
+    if (elapsed > MAX_SECONDS_PER_RUN) {
+      Logger.log("Safely pausing at photo " + (i+1) + ". Auto-resuming in " + TRIGGER_MINUTES + " mins.");
+      break;
+    }
+    var item = allPhotos[i];
+    try {
+      var file = DriveApp.getFileById(item.id);
+      var imageData = Utilities.base64Encode(file.getBlob().getBytes());
+      var url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + GEMINI_API_KEY;
+
+      // Score for all 4 album types in one call
+      var payload = {
+        contents: [{
+          parts: [
+            { text: buildMultiScorePrompt(item) },
+            { inline_data: { mime_type: item.mimeType, data: imageData } }
+          ]
+        }]
+      };
+      var response = UrlFetchApp.fetch(url, { method: "post", contentType: "application/json", payload: JSON.stringify(payload), muteHttpExceptions: true });
+      var responseJson = JSON.parse(response.getContentText());
+      if (responseJson.error) {
+        Logger.log("API Error: " + responseJson.error.message);
+        scores.push({ name: item.name, id: item.id, category: item.category, bestof: 0, candid: 0, decor: 0, gems: 0 });
+      } else {
+        var text = responseJson.candidates[0].content.parts[0].text.trim();
+        var parsed = parseMultiScore(text);
+        scores.push({ name: item.name, id: item.id, category: item.category,
+          bestof: parsed.bestof, candid: parsed.candid, decor: parsed.decor, gems: parsed.gems });
+        Logger.log("[" + (i+1) + "/" + allPhotos.length + "] " + item.name + " | bestof:" + parsed.bestof + " candid:" + parsed.candid + " decor:" + parsed.decor + " gems:" + parsed.gems);
+      }
+    } catch(e) {
+      Logger.log("Skipped: " + item.name + " | " + e.message);
+      scores.push({ name: item.name, id: item.id, category: item.category, bestof: 0, candid: 0, decor: 0, gems: 0 });
+    }
+    props.setProperty("currentIndex", String(i + 1));
+    props.setProperty("scores", JSON.stringify(scores));
+  }
+  var newIndex = parseInt(props.getProperty("currentIndex"));
+  if (newIndex >= allPhotos.length) finalize();
+  else Logger.log((allPhotos.length - newIndex) + " photos remaining. Auto-resuming.");
+}
+
+function buildMultiScorePrompt(item) {
+  var context = CATEGORY_CONTEXT[item.category] || "This is a wedding event photo.";
+  return "You are an expert wedding album curator.\\n\\n" +
+    "EVENT CONTEXT: " + context + "\\n\\n" +
+    "Score this photo on FOUR dimensions (each 1-100):\\n\\n" +
+    "BESTOF: Score for a printed wedding album. Prioritise: sharp faces, genuine emotion, perfect composition, must-have moments. Penalise: blur, duplicate burst shots, closed eyes (unless laughing).\\n\\n" +
+    "CANDID: Score for a candid/unposed moments album. Prioritise: spontaneous reactions, guests interacting naturally, behind-the-scenes, genuine laughter. Penalise: stiff posed shots.\\n\\n" +
+    "DECOR: Score for a décor and details album. Prioritise: flowers, table settings, henna close-ups, jewellery, venue architecture, food display. Penalise: people blocking the décor.\\n\\n" +
+    "GEMS: Score for a hidden gems / random moments album. Prioritise: background action, unexpected moments, weird or funny, sweet aww moments, anything that tells a story most people would miss.\\n\\n"
+    + (${JSON.stringify(customThemes)} ? "CUSTOM PRIORITIES: " + ${JSON.stringify(customThemes)} + "\\n\\n" : "")
+    + (${JSON.stringify(avoidThemes)} ? "AVOID: " + ${JSON.stringify(avoidThemes)} + "\\n\\n" : "")
+    + (${JSON.stringify(candidThemes)} ? "CANDID THEMES TO FIND: " + ${JSON.stringify(candidThemes)} + "\\n\\n" : "")
+    + "Reply with EXACTLY this format (nothing else):\\nBESTOF:[number]\\nCANDID:[number]\\nDECOR:[number]\\nGEMS:[number]";
+}
+
+function parseMultiScore(text) {
+  var bestof = (text.match(/BESTOF:(\d+)/) || [0,0])[1];
+  var candid  = (text.match(/CANDID:(\d+)/)  || [0,0])[1];
+  var decor   = (text.match(/DECOR:(\d+)/)   || [0,0])[1];
+  var gems    = (text.match(/GEMS:(\d+)/)    || [0,0])[1];
+  return {
+    bestof: Math.min(100, parseInt(bestof) || 0),
+    candid: Math.min(100, parseInt(candid) || 0),
+    decor:  Math.min(100, parseInt(decor) || 0),
+    gems:   Math.min(100, parseInt(gems) || 0)
+  };
+}
+
+function finalize() {
+  var props = PropertiesService.getScriptProperties();
+  var scores = JSON.parse(props.getProperty("scores") || "[]");
+  Logger.log("All " + scores.length + " photos scored. Building albums...");
+
+  // Best Of album — by category quota
+  if (RUN_BEST_OF) {
+    var bestOfFolder = DriveApp.createFolder("📸 FrameWise — Best Of Album");
+    var byCategory = {};
+    var cats = Object.keys(QUOTA);
+    for (var k=0; k<cats.length; k++) byCategory[cats[k]] = [];
+    for (var i=0; i<scores.length; i++) {
+      if (byCategory[scores[i].category] !== undefined) byCategory[scores[i].category].push(scores[i]);
+    }
+    for (var c=0; c<cats.length; c++) {
+      var cat = cats[c];
+      var catItems = byCategory[cat].sort(function(a,b){return b.bestof - a.bestof;}).slice(0, QUOTA[cat]);
+      Logger.log("Best Of: " + catItems.length + " photos from " + cat);
+      for (var j=0; j<catItems.length; j++) {
+        try { DriveApp.getFileById(catItems[j].id).makeCopy("[" + cat + "] " + catItems[j].name, bestOfFolder); } catch(e) {}
+      }
+    }
+    Logger.log("✅ Best Of album created!");
+  }
+
+  // Candid album — top 60 by candid score
+  if (RUN_CANDIDS) {
+    var candidFolder = DriveApp.createFolder("🤣 FrameWise — Candid Moments");
+    var sorted = scores.slice().sort(function(a,b){return b.candid - a.candid;}).slice(0, 60);
+    for (var s=0; s<sorted.length; s++) {
+      try { DriveApp.getFileById(sorted[s].id).makeCopy(sorted[s].name, candidFolder); } catch(e) {}
+    }
+    Logger.log("✅ Candids album created — " + sorted.length + " photos!");
+  }
+
+  // Decor album — top 40 by decor score
+  if (RUN_DECOR) {
+    var decorFolder = DriveApp.createFolder("✨ FrameWise — Décor & Details");
+    var sortedDecor = scores.slice().sort(function(a,b){return b.decor - a.decor;}).slice(0, 40);
+    for (var d=0; d<sortedDecor.length; d++) {
+      try { DriveApp.getFileById(sortedDecor[d].id).makeCopy(sortedDecor[d].name, decorFolder); } catch(e) {}
+    }
+    Logger.log("✅ Décor album created — " + sortedDecor.length + " photos!");
+  }
+
+  // Hidden Gems — top 30 by gems score, excluding already in Best Of top 50
+  if (RUN_GEMS) {
+    var gemsFolder = DriveApp.createFolder("🎲 FrameWise — Hidden Gems");
+    var sortedGems = scores.slice().sort(function(a,b){return b.gems - a.gems;}).slice(0, 30);
+    for (var g=0; g<sortedGems.length; g++) {
+      try { DriveApp.getFileById(sortedGems[g].id).makeCopy(sortedGems[g].name, gemsFolder); } catch(e) {}
+    }
+    Logger.log("✅ Hidden Gems album created — " + sortedGems.length + " photos!");
+  }
+
+  clearAll();
+  Logger.log("🎉 ALL DONE! Check your Google Drive for the FrameWise folders.");
+}
+
+function clearAll() {
+  var triggers = ScriptApp.getProjectTriggers();
+  for (var i=0; i<triggers.length; i++) ScriptApp.deleteTrigger(triggers[i]);
+  PropertiesService.getScriptProperties().deleteAllProperties();
+  Logger.log("Reset complete.");
+}
+
+// ================================================================
+// appsscript.json — paste this into your manifest file
+// ================================================================
+/*
+{
+  "timeZone": "Asia/Kolkata",
+  "dependencies": {},
+  "exceptionLogging": "STACKDRIVER",
+  "runtimeVersion": "V8",
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/drive",
+    "https://www.googleapis.com/auth/script.scriptapp",
+    "https://www.googleapis.com/auth/script.external_request"
+  ]
+}
+*/`;
+
+  document.getElementById('script-output').textContent = generatedScript;
+}
+
+function copyScript() {
+  navigator.clipboard.writeText(generatedScript).then(() => {
+    const btn = document.querySelector('.btn-copy');
+    btn.textContent = '✅ Copied!';
+    setTimeout(() => { btn.innerHTML = '📋 Copy script'; }, 2000);
+  });
+}
+
+// ── ACCORDION ──
+function toggleAcc(header) {
+  header.parentElement.classList.toggle('open');
+}
+
+// ── INIT ──
+renderEvents();
+</script>
+</body>
+</html>
+`;
